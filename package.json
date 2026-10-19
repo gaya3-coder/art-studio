@@ -1,0 +1,12 @@
+{
+  "name": "art-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Art studio: paintings, wall-painting bookings, custom pottery (zero npm dependencies)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node --no-warnings src/server.js",
+    "test": "node --no-warnings test/smoke.js"
+  },
+  "engines": { "node": ">=22.13" }
+}
