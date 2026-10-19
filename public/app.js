@@ -737,15 +737,27 @@ function pagePaintings() {
 
 function paintingCard(p) {
   const available = p.status === 'available';
+  const admin = isAdmin();
 
   let action = '';
 
-  if (!isAdmin() && available) {
+  if (admin) {
     action = `
-      <button class="btn" data-act="buy" data-id="${esc(p.id)}">
-        Buy painting
-      </button>`;
-  } else if (!isAdmin() && !available) {
+      <div class="card-actions">
+        <button class="btn ghost" data-act="edit-painting"
+          data-id="${esc(p.id)}">Edit painting</button>
+        ${available ? `
+          <button class="btn danger" data-act="delete-painting"
+            data-id="${esc(p.id)}">Delete painting</button>
+        ` : ''}
+      </div>`;
+  } else if (available) {
+    action = `
+      <div class="card-actions">
+        <button class="btn" data-act="buy"
+          data-id="${esc(p.id)}">Buy painting</button>
+      </div>`;
+  } else {
     const saved = (() => {
       try {
         const items = JSON.parse(store.get('artstudio-interest') || '[]');
@@ -756,34 +768,28 @@ function paintingCard(p) {
     })();
 
     action = `
-      <button class="btn ghost" data-act="notify-interest"
-        data-id="${esc(p.id)}" ${saved ? 'disabled' : ''}>
-        ${saved ? 'Interest Saved' : 'Notify Me When Available'}
-      </button>
-      <p class="hint">Sold artwork. Save your interest on this browser.</p>`;
-  } else {
-    action = `
-      <button class="btn ghost" data-act="edit-painting"
-        data-id="${esc(p.id)}">Edit painting</button>
-      ${available ? `
-        <button class="btn danger" data-act="delete-painting"
-          data-id="${esc(p.id)}">Delete painting</button>
-      ` : ''}
-    `;
+      <div class="card-actions">
+        <button class="btn ghost" data-act="notify-interest"
+          data-id="${esc(p.id)}" ${saved ? 'disabled' : ''}>
+          ${saved ? 'Interest Saved' : 'Notify Me When Available'}
+        </button>
+        <p class="hint">Sold artwork. Save your interest on this browser.</p>
+      </div>`;
   }
 
   return `
     <article class="painting-card">
       <img src="${esc(p.imageUrl || '')}" alt="${esc(p.title)}">
-      <h3>${esc(p.title)}</h3>
-      <p>${esc(p.artist)}</p>
-      <p>${esc(p.description || '')}</p>
-      <p>₹${Number(p.price).toLocaleString('en-IN')}</p>
-      <p>${esc(p.status)}</p>
-      <div class="card-actions">${action}</div>
+      <div class="painting-card-content">
+        <h3>${esc(p.title)}</h3>
+        <p>${esc(p.artist)}</p>
+        <p>${esc(p.description || '')}</p>
+        <p>₹${Number(p.price).toLocaleString('en-IN')}</p>
+        <p>${esc(p.status)}</p>
+        ${action}
+      </div>
     </article>`;
 }
-
 
 function editPainting(id) {
   const p = state.cache.paintings[id];
