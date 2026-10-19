@@ -923,3 +923,27 @@ summary:focus-visible {
     opacity: 1;
   }
 }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.brand h1 {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .brand img {
+    width: 38px;
+    height: 38px;
+  }
+}
