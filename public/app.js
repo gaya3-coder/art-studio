@@ -1094,6 +1094,8 @@ function potteryFields(r = {}, editing = false) {
 }
 
 function pagePottery() {
+  
+function pagePottery() {
   main.innerHTML = `
     ${isAdmin() ? `
       <h2>Pottery requests</h2>` : `
@@ -1127,10 +1129,14 @@ function pagePottery() {
           <table>
             <thead>
               <tr>
-                <th>#</th><th>Item</th><th>Glaze</th><th>Qty</th>
+                <th>#</th>
+                <th>Item</th>
+                <th>Glaze</th>
+                <th>Qty</th>
                 <th>Needed by</th>
                 ${isAdmin() ? '<th>Customer</th>' : ''}
-                <th>Status</th><th></th>
+                <th>Status</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -1139,17 +1145,21 @@ function pagePottery() {
 
                 if (isAdmin() && r.status === 'requested') {
                   actions = `
-                    <button class="btn" data-act="accept-pottery"
+                    <button class="btn"
+                      data-act="accept-pottery"
                       data-id="${esc(r.id)}">Accept</button>
-                    <button class="btn danger" data-act="decline-pottery"
+                    <button class="btn danger"
+                      data-act="decline-pottery"
                       data-id="${esc(r.id)}">Decline</button>`;
                 }
 
                 if (!isAdmin() && r.status === 'requested') {
                   actions = `
-                    <button class="btn ghost" data-act="edit-pottery"
+                    <button class="btn ghost"
+                      data-act="edit-pottery"
                       data-id="${esc(r.id)}">Edit</button>
-                    <button class="btn danger" data-act="cancel-pottery"
+                    <button class="btn danger"
+                      data-act="cancel-pottery"
                       data-id="${esc(r.id)}">Cancel</button>`;
                 }
 
@@ -1180,48 +1190,34 @@ function pagePottery() {
 
   state.reload();
 
-if (isAdmin()) {
-  $('#addPainting').onsubmit = async (ev) => {
+  if (isAdmin()) return;
+
+  const form = $('#potForm');
+
+  form.onsubmit = async (ev) => {
     ev.preventDefault();
 
-    const form = ev.currentTarget;
-    const submitButton = form.querySelector('button[type="submit"], button:not([type])');
-
-    if (submitButton) submitButton.disabled = true;
-
     try {
-      const painting = Object.fromEntries(new FormData(form));
-
-      await api('/paintings', {
+      await api('/pottery', {
         method: 'POST',
-        body: painting,
+        body: Object.fromEntries(new FormData(form)),
       });
 
       form.reset();
 
-      // Refresh the gallery and wait for the request to finish.
-      await state.reload();
-
-      flash('Painting added. Gallery refreshed.', 'ok');
+      flash(
+        'Request sent. The studio will accept or decline it.',
+        'ok'
+      );
     } catch (e) {
-      flash('Could not add or refresh the painting: ' + e.message, 'err');
-    } finally {
-      if (submitButton) submitButton.disabled = false;
+      flash(e.message, 'err');
     }
+
+    state.reload();
   };
 }
 
-        form.reset();
-        flash('Request sent. The studio will accept or decline it.', 'ok');
-      } catch (e) {
-        flash(e.message, 'err');
-      }
-
-      state.reload();
-    };
-  }
 }
-
 function editPottery(id) {
   const r = state.cache.pottery[id];
   if (!r) return;
