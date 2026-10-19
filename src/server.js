@@ -204,8 +204,28 @@ function createApp(opts = {}) {
       return q('SELECT * FROM paintings WHERE id=?').get(p.id);
     }));
   });
+  
+  // Delete an available painting (admin only)
+  route('DELETE', '/api/paintings/:id', ['admin'], ({ params }) => {
+    return tx(() => {
+      const p = q('SELECT * FROM paintings WHERE id=?').get(params.id);
+      if (!p) throw notFound('Painting');
+      if (p.status !== 'available') {
+        throw conflict('Only available paintings can be deleted');
+      }
+
+      const orders = q('SELECT 1 FROM orders WHERE painting_id=?').get(p.id);
+      if (orders) {
+        throw conflict('This painting has order history and cannot be deleted');
+      }
+
+      q('DELETE FROM paintings WHERE id=?').run(p.id);
+      return { ok: true, message: 'Painting deleted successfully' };
+    });
+  });
 
   // ---- orders (buy a painting)
+
   route('POST', '/api/orders', ['customer'], ({ user, body }) => {
     const paintingId = str(body.paintingId, 'paintingId', { max: 50 });
     const id = tx(() => {

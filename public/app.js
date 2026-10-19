@@ -616,10 +616,24 @@ document.addEventListener('click', (ev) => {
         () => api(`/pottery/${id}/decline`, { method: 'POST' }),
         'Request declined.'
       ),
-
+      
     'edit-painting': () => editPainting(id),
+    'delete-painting': async () => {
+      if (!confirm('Are you sure you want to delete this painting?')) return;
+
+      try {
+        await api(`/api/paintings/${encodeURIComponent(id)}`, {
+          method: 'DELETE'
+        });
+        await render();
+        alert('Painting deleted successfully.');
+      } catch (err) {
+        alert(err.message || 'Could not delete painting.');
+      }
+    },
     'edit-pottery': () => editPottery(id),
   };
+
 
   if (actions[button.dataset.act]) actions[button.dataset.act]();
 });
@@ -720,17 +734,18 @@ function pagePaintings() {
   }
 }
 
+
 function paintingCard(p) {
   const available = p.status === 'available';
 
   let action = '';
 
-  if (available && !isAdmin()) {
+  if (!isAdmin() && available) {
     action = `
       <button class="btn" data-act="buy" data-id="${esc(p.id)}">
         Buy painting
       </button>`;
-  } else if (!available && !isAdmin()) {
+  } else if (!isAdmin() && !available) {
     const saved = (() => {
       try {
         const items = JSON.parse(store.get('artstudio-interest') || '[]');
@@ -746,51 +761,29 @@ function paintingCard(p) {
         ${saved ? 'Interest Saved' : 'Notify Me When Available'}
       </button>
       <p class="hint">Sold artwork. Save your interest on this browser.</p>`;
-  } else if (available && isAdmin()) {
+  } else {
     action = `
       <button class="btn ghost" data-act="edit-painting"
-        data-id="${esc(p.id)}">Edit painting</button>`;
-  } else if (isAdmin()) {
-    action = `
-      <button class="btn ghost" data-act="edit-painting"
-        data-id="${esc(p.id)}">Edit painting</button>`;
+        data-id="${esc(p.id)}">Edit painting</button>
+      ${available ? `
+        <button class="btn danger" data-act="delete-painting"
+          data-id="${esc(p.id)}">Delete painting</button>
+      ` : ''}
+    `;
   }
 
-  const image = p.imageUrl
-    ? `
-      <button type="button" class="painting-image-button"
-        data-painting-preview="${esc(p.id)}"
-        aria-label="View ${esc(p.title)} larger">
-        <img src="${esc(p.imageUrl)}" alt="${esc(p.title)}"
-          loading="lazy">
-        <span class="image-zoom-label">View artwork ↗</span>
-      </button>`
-    : `
-      <div class="painting-image-placeholder">
-        Artwork image unavailable
-      </div>`;
-
   return `
-    <article class="card">
-      ${image}
-      <div class="body">
-        <h3 title="${esc(p.title)}">${esc(p.title)}</h3>
-        <p class="painting-artist">${esc(p.artist)}</p>
-        <div class="painting-meta">
-          <span class="price">${money(p.price)}</span>
-          ${badge(p.status)}
-        </div>
-
-        ${p.description ? `
-          <details>
-            <summary>About this painting</summary>
-            <p>${esc(p.description)}</p>
-          </details>` : ''}
-
-        <div class="card-action">${action}</div>
-      </div>
+    <article class="painting-card">
+      <img src="${esc(p.imageUrl || '')}" alt="${esc(p.title)}">
+      <h3>${esc(p.title)}</h3>
+      <p>${esc(p.artist)}</p>
+      <p>${esc(p.description || '')}</p>
+      <p>₹${Number(p.price).toLocaleString('en-IN')}</p>
+      <p>${esc(p.status)}</p>
+      <div class="card-actions">${action}</div>
     </article>`;
 }
+
 
 function editPainting(id) {
   const p = state.cache.paintings[id];
@@ -1094,8 +1087,6 @@ function potteryFields(r = {}, editing = false) {
 }
 
 function pagePottery() {
-  
-function pagePottery() {
   main.innerHTML = `
     ${isAdmin() ? `
       <h2>Pottery requests</h2>` : `
@@ -1215,8 +1206,6 @@ function pagePottery() {
 
     state.reload();
   };
-}
-
 }
 function editPottery(id) {
   const r = state.cache.pottery[id];
