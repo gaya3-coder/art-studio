@@ -1180,17 +1180,36 @@ function pagePottery() {
 
   state.reload();
 
-  if (!isAdmin()) {
-    $('#potForm').onsubmit = async (ev) => {
-      ev.preventDefault();
+if (isAdmin()) {
+  $('#addPainting').onsubmit = async (ev) => {
+    ev.preventDefault();
 
-      const form = ev.currentTarget;
+    const form = ev.currentTarget;
+    const submitButton = form.querySelector('button[type="submit"], button:not([type])');
 
-      try {
-        await api('/pottery', {
-          method: 'POST',
-          body: Object.fromEntries(new FormData(form)),
-        });
+    if (submitButton) submitButton.disabled = true;
+
+    try {
+      const painting = Object.fromEntries(new FormData(form));
+
+      await api('/paintings', {
+        method: 'POST',
+        body: painting,
+      });
+
+      form.reset();
+
+      // Refresh the gallery and wait for the request to finish.
+      await state.reload();
+
+      flash('Painting added. Gallery refreshed.', 'ok');
+    } catch (e) {
+      flash('Could not add or refresh the painting: ' + e.message, 'err');
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+  };
+}
 
         form.reset();
         flash('Request sent. The studio will accept or decline it.', 'ok');
