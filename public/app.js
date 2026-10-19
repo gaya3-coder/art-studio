@@ -777,18 +777,27 @@ function paintingCard(p) {
       </div>`;
   }
 
+
   return `
-    <article class="painting-card">
-      <img src="${esc(p.imageUrl || '')}" alt="${esc(p.title)}">
-      <div class="painting-card-content">
+    <article class="card">
+      ${p.imageUrl ? `
+        <img src="${esc(p.imageUrl)}" alt="${esc(p.title)}">
+      ` : `
+        <div class="painting-image-placeholder">No image available</div>
+      `}
+      <div class="body">
         <h3>${esc(p.title)}</h3>
-        <p>${esc(p.artist)}</p>
-        <p>${esc(p.description || '')}</p>
-        <p>₹${Number(p.price).toLocaleString('en-IN')}</p>
-        <p>${esc(p.status)}</p>
+        <p class="painting-artist">${esc(p.artist)}</p>
+        <details>
+          <summary>Description</summary>
+          <p>${esc(p.description || '')}</p>
+        </details>
+        <p class="price">₹${Number(p.price).toLocaleString('en-IN')}</p>
+        <span class="badge ${esc(p.status)}">${esc(p.status)}</span>
         ${action}
       </div>
     </article>`;
+
 }
 
 function editPainting(id) {
