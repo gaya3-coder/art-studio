@@ -3,3 +3,6 @@ node_modules/
 data/
 *.db
 *.db-*
+
+src/db.js.backup
+src/server.js.backup
