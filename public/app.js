@@ -622,7 +622,7 @@ document.addEventListener('click', (ev) => {
       if (!confirm('Are you sure you want to delete this painting?')) return;
 
       try {
-        await api(`/api/paintings/${encodeURIComponent(id)}`, {
+        await api(`/paintings/${encodeURIComponent(id)}`, {
           method: 'DELETE'
         });
         await render();
