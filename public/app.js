@@ -631,6 +631,19 @@ document.addEventListener('click', (ev) => {
         alert(err.message || 'Could not delete painting.');
       }
     },
+    'restore-painting': async () => {
+  try {
+    await api(`/admin/paintings/${encodeURIComponent(id)}/restore`, {
+      method: 'POST'
+    });
+
+    flash('Painting restored successfully.', 'ok');
+await state.reload();
+await loadDeletedPaintings();
+  } catch (err) {
+    alert(err.message || 'Could not restore painting.');
+  }
+},
     'edit-pottery': () => editPottery(id),
   };
 
@@ -675,6 +688,7 @@ function paintingForm(p = {}) {
     )}`;
 }
 
+
 function pagePaintings() {
   main.innerHTML = `
     <section class="page-heading">
@@ -692,7 +706,15 @@ function pagePaintings() {
         </form>
       </details>` : ''}
 
-    <div id="list"></div>`;
+    <div id="list"></div>
+
+    ${isAdmin() ? `
+      <section class="recently-deleted">
+        <h3>Recently Deleted</h3>
+        <div id="deletedList"></div>
+      </section>
+    ` : ''}
+  `;
 
   const list = $('#list');
 
@@ -712,6 +734,8 @@ function pagePaintings() {
   state.reload();
 
   if (isAdmin()) {
+    loadDeletedPaintings();
+
     $('#addPainting').onsubmit = async (ev) => {
       ev.preventDefault();
 
@@ -731,6 +755,40 @@ function pagePaintings() {
 
       state.reload();
     };
+  }
+}
+
+async function loadDeletedPaintings() {
+  const deletedList = $('#deletedList');
+
+  if (!isAdmin() || !deletedList) return;
+
+  try {
+    const rows = await api('/admin/deleted-paintings');
+
+    if (!rows.length) {
+      deletedList.innerHTML = '<p>No deleted paintings.</p>';
+      return;
+    }
+
+    deletedList.innerHTML = `<div class="grid">
+      ${rows.map(p => `
+        <article class="card">
+          <div class="body">
+            <h3>${esc(p.title)}</h3>
+            <p>${esc(p.artist || '')}</p>
+            <button class="btn"
+              data-act="restore-painting"
+              data-id="${esc(p.id)}">
+              Restore
+            </button>
+          </div>
+        </article>
+      `).join('')}
+    </div>`;
+  } catch (e) {
+    deletedList.innerHTML = '<p>Could not load deleted paintings.</p>';
+    console.error(e);
   }
 }
 

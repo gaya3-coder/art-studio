@@ -5,7 +5,7 @@
   "description": "Art studio: paintings, wall-painting bookings, custom pottery (zero npm dependencies)",
   "main": "src/server.js",
   "scripts": {
-    "start": "node --no-warnings src/server.js",
+    "start": "node --no-warnings src/server-pg.js",
     "test": "node --no-warnings test/smoke.js"
   },
   "engines": {

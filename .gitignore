@@ -6,3 +6,5 @@ data/
 
 src/db.js.backup
 src/server.js.backup
+.env.*
+!.env.example
