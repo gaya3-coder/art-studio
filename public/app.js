@@ -625,7 +625,7 @@ document.addEventListener('click', (ev) => {
         await api(`/paintings/${encodeURIComponent(id)}`, {
           method: 'DELETE'
         });
-        await render();
+        window.location.reload();
         alert('Painting deleted successfully.');
       } catch (err) {
         alert(err.message || 'Could not delete painting.');
