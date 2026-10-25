@@ -1,27 +1,53 @@
 # Art Studio
 
-A small web app for an art studio that (1) sells one-of-a-kind paintings, (2) paints walls on booking, and (3) makes custom pottery on request. Customers buy/book/request; the studio (admin) confirms or declines.
+A web application for an art studio that sells one-of-a-kind paintings, accepts wall-painting bookings, and handles custom pottery requests. Customers can purchase paintings, book wall-painting services, and request custom pottery. The studio administrator manages paintings, bookings, and requests.
 
-**Stack:** Node.js (22.13+) with its built-in `node:http` and `node:sqlite`, plain HTML/CSS/JS front end.  
-**There are no npm dependencies, so there is nothing to install.**
+**Stack:** Node.js, built-in `node:http`, PostgreSQL (Supabase), and a plain HTML/CSS/JavaScript frontend.
 
-## Run it (clean machine)
+## Live Website
+
+https://art-studio-729j.onrender.com/
+
+## Run Locally
+
+### Prerequisites
+
+- Node.js 22.13 or later
+- A Supabase PostgreSQL database
+- Git
+
+### Setup
 
 ```bash
-node -v
-git clone <this repo> && cd art-studio
-cp .env.example .env
+git clone https://github.com/gaya3-coder/art-studio.git
+cd art-studio
+npm install
+```
+
+Create a `.env` file in the project root and add your Supabase PostgreSQL connection string:
+
+```env
+DATABASE_URL=your_supabase_postgresql_connection_string
+```
+
+Keep your actual database credentials private. Never commit `.env` to GitHub.
+
+Start the application:
+
+```bash
 npm start
 ```
 
-Open http://localhost:3000. On first start the SQLite file (`data/studio.db`) is created and seeded from `seed/seed.json`.
+Open http://localhost:3000 in your browser.
 
-| Who | Login |
-|---|---|
-| Studio (admin) | `studio@artstudio.in` / `Studio@123` |
-| Customer | Use "Sign up" on the login screen |
+**Note:** The application requires a working Supabase PostgreSQL database and the required database schema and seed data. Follow the project's database setup instructions before running it on a fresh database.
 
-To reset all data, stop the server and delete the `data/` folder.
+## Login
+
+- **Studio administrator:** Use the configured studio account.
+- **Customer:** Register through the website using the Sign Up option.
+
+Do not publish real passwords or database credentials in this README.
 
 ## Tests
 
@@ -29,17 +55,20 @@ To reset all data, stop the server and delete the `data/` folder.
 npm test
 ```
 
-Runs 17 end-to-end checks covering authentication, role rules, booking limits, and concurrent purchases and bookings.
+Run the automated tests to verify authentication, role permissions, booking rules, and concurrent purchases and bookings.
 
 ## Configuration
 
-See `.env.example` for the available settings: port, database path, studio timezone, and session duration.
+The application uses the `DATABASE_URL` environment variable to connect to Supabase PostgreSQL. Configure environment variables in your local `.env` file and in Render's Environment settings.
 
-## Layout
+## Project Structure
 
-- `src/server.js` — routes, role checks, business rules, and static file serving
-- `src/db.js` — database schema and seeding
-- `src/util.js` — validation, password hashing, and date helpers
-- `public/` — website interface, styles, scripts, and images
-- `seed/seed.json` — initial seed data
-- `test/smoke.js` — end-to-end tests
+- `src/server-pg.js` — PostgreSQL-backed server, API routes, authorization, and business logic
+- `src/db-pg.js` — PostgreSQL connection and database utilities
+- `public/` — Website interface, styles, scripts, and images
+- `package.json` — Project scripts and dependencies
+- `.gitignore` — Excludes environment files and other local-only data
+
+## Deployment
+
+The application is deployed on Render and uses Supabase PostgreSQL for persistent database storage.
